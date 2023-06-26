@@ -1,0 +1,99 @@
+----------------------------------------------------------------------------------------------------------------------------------------
+-- Introduccion a SEO
+----------------------------------------------------------------------------------------------------------------------------------------
+-> Funcionamiento de la búsqueda de Google
+-> Medios de crecimiento con productos de google (Maps, YT, Buscador)
+-> Optimizar un sitio
+-> Medir rendimiento en Google
+
+Validar que un sitio ha sido rastreado
+site:[dominio.com]
+
+Optimizar tu sitio para buscadores
+-> Incluye títulos descriptivos
+-> Proporciona la mayor información
+-> Adapta tu contenido a las necesidades del contexto
+-> Usa texto (No sólo imágenes o videos)
+-> Logra referencias de otros sitio en la web
+
+Medir rendimiento en Google 
+-> Impresiones: Número de veces que alguien ha visto tu sitio en los resultados de búsqueda
+-> Clics EL número de veces que una persona ha hecho clic en alguno de tus enlaces
+-> Posición media: La posición en la que se muestra tu sitio (Cuanto menor, más arriba aparece)
+
+Razones por las que tu sitio no aparece en google
+-> No hay otros sitios que lo enlacen
+-> Google puede tardar semanas en rastrear tu sitio
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+-- SEO avanzado
+----------------------------------------------------------------------------------------------------------------------------------------
+Google no acepta pagos para rastear sitios con mayor frecuencia ni para mejorar el posicionamiento
+
+Fases de búsqueda de Google
+-> Rastreo: Descarga texto, imágenes, videos, de forma automatizada.
+-> Indexación: Analiza los recursos y almacena información en el índice
+-> Publicación de resultados: Hace pública la información guardada y que puede ser relevante en una búsqueda
+
+Directrices generales:
+-> Simplificar estructura de las URL: se require que google entienda en qué consiste; usa palabras en lugar de números grandes.
+-> Sitios regionales usar subdominios, subdirectorios
+-> Colocar url con palabras separadas por giones medios, NO(espacios, giones bajos)
+
+Informar tipos de enlaces salientes:
+-> rel="sponsored": enlaces salientes de anuncios
+-> rel="ugc": Contenido generado por usuarios, como publicaciones o comentarios en blogs
+-> rel="nofollow": Para que google no asocie tu sitio con el del enlace y no lo rastree por este mismo
+Puedes colocar más de un valor en el rel="ugc, nofollow" separándolos por coma
+
+Evitar los intersticiales y los cuadros de diálogo invasivos
+-> cuadros de diálogo invasivos son elementos de página que impiden a los usuarios visualizar el contenido y, por lo general, tienen fines publicitarios.
+-> En su lugar cuadros de dialogo no invasivos: permites que google y los usuarios entiendan el contenido
+
+Compatibilidad del navegador
+-> Prueba tu sitio en el mayor número de navegadores posible: para verifica que tu sitio funciona correctamente.
+-> Utiliza código HTML claro y válido: código limpio y semántico
+-> Especifica codificación de caracteres: <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+Evitar que se cree contenido duplicado
+-> En la mayoría de los casos cuando se tiene el mismo contenido para una versión móvil o bien para una página de impresión
+-> Es conveniente emplear canonicalización
+
+Emplear metadatos correctos en los documentos
+-> title
+-> meta
+-> link
+-> script
+-> style
+-> base
+-> noscript
+-> template
+-> NOTA: cundo google detecta otro elemento no permitido determina que el head ha terminado
+
+Permite el rastreo de enlaces:
+-> Google requiere que las etiquetas a contengan un atributo href
+-> No se rastrean etiquetas a sin href
+-> Considera que las url lleven a algún destino, no permitido # 
+
+Ofrece una gran experiencia de usuario en imágenes
+-> Contexto adecuado "Impagenes que vayan de acuerdo al tema"
+-> Coloca las imágenes cerca del texto pertinente y la impagen más importante en la parte superior
+-> No insertar texto en las imagenes
+-> Haz sitios responsivos
+-> Define buena estructura de URLs en tus imágenes. Google aprovecha la url y el nombre para interpretar las imágenes
+
+Añade datos estructurados 
+Optimiza tus imágenes para tener un sitio con mayor velocidad de carga
+Incluye fotos de buena calidad
+Incluye títulos, subtítulos, nombres de archivos y texto descriptivos en las imágenes
+Utiliza textos alternativos descriptivos
+
+
+
+
+
+
+
+
+https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/?referrer=ampproject.org

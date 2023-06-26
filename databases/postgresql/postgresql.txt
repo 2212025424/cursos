@@ -1,0 +1,297 @@
+-> Instalar postgres
+sudo apt update
+sudo apt install postgresql
+
+-> Despues de cambios en archivos reiniciar servicio
+/etc/init.d/postgresql restart
+sudo systemctl restart postgresql.service
+
+--------------------------------------------------------------------------------------------------------------------
+-- Archivos de configuracion postgres
+--------------------------------------------------------------------------------------------------------------------
+
+pg_hba.conf
+-> Contiene las formas de acceso de postgres
+
+postgresql.conf
+-> Contiene las confiraciones generales, paths, puertos, conexiones, direcciones ip que pueden conectarse
+
+Forma de concatenar cadenas 
+-> 'HOLA ' || 'Mundo'
+
+Lenguajes procedurales 
+-> plpgsql
+-> pljava
+-> plperl
+-> pcl
+-> plpython
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Crear base de datos con tablespace
+--------------------------------------------------------------------------------------------------------------------
+
+-> Ver permisos y dueños de directorios
+ll
+
+-> Crear directorio dedicado para base de datos
+mkdir /var/databases/myfirstdb
+
+-> Cambiar dueño de carpeta
+chown -R postgres databases
+
+-> Cambiar grupo de directorio
+chgrp -R postgres databases
+
+-> Crear tablespace
+CREATE TABLESPACE tblspc_myfirstdb LOCATION '/var/databases/myfirstdb';
+
+-> Creat base de datos y asignar a tablespace
+CREATE DATABASE myfirstdb TABLESPACE = 'tblspc_myfirstdb';
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Crear base de datos con dueño
+--------------------------------------------------------------------------------------------------------------------
+
+-> Crear rol 
+CREATE ROLE estudiante LOGIN PASSWORD 'estudiante';
+
+-> Crear base de datos y asignar al rol
+CREATE DATABASE estudiantes OWNER estudiante;
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones con retornos simples
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION fixeddicount (_price real) 
+RETURNS real AS
+    $BODY$
+        DECLARE
+        newval real;
+        BEGIN
+            newval = _price * 0.9;
+            RETURN newval;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+-- Condicionales
+
+IF A > B AND C < D OR E = F OR G <> H THEN 
+    -- Logica de verdad
+ELSIF I > J THEN
+    -- Logica de verdad
+ELSE 
+    -- lógica exepcion
+END IF;
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones con retorno de consultas y resultados paginados
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION getproducsbypage (_page integer, _limit integer) 
+RETURNS SETOF product
+AS
+    $BODY$
+        DECLARE 
+        start integer;
+        BEGIN
+            start = _limit * _page - _limit;
+            RETURN QUERY SELECT * FROM product LIMIT _limit OFFSET start;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+// Llamado de funcion
+SELECT * FROM getproducsbypage(1, 2);
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones con ciclos
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION justfor () 
+RETURNS void
+AS
+    $BODY$
+        DECLARE 
+            iterator integer;
+        BEGIN
+            FOR iterator IN 1..10 LOOP
+                RAISE NOTICE 'Voy en el iterador: %', iterator;
+            END LOOP;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones para recorrer un SELECT 
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION rowiterator () 
+RETURNS SETOF product
+AS
+    $BODY$
+        DECLARE 
+            row product%ROWTYPE;
+        BEGIN
+            FOR row IN SELECT * FROM PRODUCT LOOP
+                RETURN NEXT row;
+            END LOOP;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+SELECT * FROM rowiterator();
+
+CRETAE OR REPLACE FUNCTION getproducts () 
+RETURNS void
+AS
+    $BODY$
+        DECLARE 
+            val integer;
+        BEGIN
+            val = 5;
+            WHILE val < 10 LOOP
+                RAISE NOTICE 'Voy en el valor %', val;
+                val = val + 1;
+            END LOOP;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+SELECT * FROM getproducts();
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones tipos de datos
+--------------------------------------------------------------------------------------------------------------------
+
+-> table.flield%TYPE; ---- Permite copiar el tipo exacto de una columana de una tabla
+-> table%ROWTYPE; ---- Permite copiar el tipo exacto de fila de una tabla
+
+CREATE OR REPLACE FUNCTION function_name (params datatype) 
+RETURNS datatype
+AS 
+    $BODY$
+        DECLARE 
+        myvar table.flield%TYPE;
+        myrow table%TYPE;
+        BEGIN
+            myrow.columname; // Obtiene el valor de la columana
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones que responden a TRIGGERS
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION validateproducts () 
+RETURNS TRIGGER AS
+    $BODY$
+        BEGIN
+            IF NEW.name IS NULL OR length(NEW.name) < 0 THEN
+                RAISE EXCEPTION 'Debe insertar el nombre';
+            END IF;
+            IF NEW.price < 0 THEN
+                RAISE EXCEPTION 'Inserte correctamente el precio';
+            END IF;
+            IF NEW.cost < 0 THEN
+                RAISE EXCEPTION 'Inserte correctamente el costo';
+            END IF;
+
+            -- NEW.date = now();
+            -- NEW.user = user;
+
+            RETURN NEW;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER validateproducts 
+BEFORE INSERT OR UPDATE 
+ON product
+FOR EACH ROW EXECUTE PROCEDURE validateproducts();
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Practica de auditoría
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE auditoria_productos(
+  accion varchar(20),
+  fecha timestamp,
+  nombre varchar(20),
+  cantidad smallint,
+  precio smallint
+)
+
+CREATE OR REPLACE FUNCTION auditoria_productos()
+RETURNS TRIGGER AS
+$BODY$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+     INSERT INTO auditoria_productos (accion, fecha, nombre, cantidad, precio)
+     VALUES ('INSERTAR', now(), NEW.nombre, NEW.cantidad, NEW.precio);
+     RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+     INSERT INTO auditoria_productos (accion, fecha, nombre, cantidad, precio)
+     VALUES ('BORRAR', now(), OLD.nombre, OLD.cantidad, OLD.precio);
+     RETURN NULL;
+  ELSIF TG_OP = 'UPDATE' THEN
+     INSERT INTO auditoria_productos (accion, fecha, nombre, cantidad, precio)
+     VALUES ('ANTES ACTUALIZAR', now(), OLD.nombre, OLD.cantidad, OLD.precio);
+     INSERT INTO auditoria_productos (accion, fecha, nombre, cantidad, precio)
+     VALUES ('DESPUES ACTULIZAR', now(), NEW.nombre, NEW.cantidad, NEW.precio);
+     RETURN NEW;
+  END IF;
+END;
+$BODY$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER auditoria_productos
+AFTER INSERT OR UPDATE OR DELETE
+ON product
+FOR EACH ROW EXECUTE PROCEDURE auditoria_productos();
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Metacomandos postgres
+--------------------------------------------------------------------------------------------------------------------
+
+-> Mostrar comandos de ayuda
+\h
+
+-> Listar bases de datos
+\l
+
+-> Conectarse/usar a una base de datos
+\c [db_name]
+
+-> Listar tablas de una base de datos
+\d
+
+-> Listas las caracteristicas de una tabla
+\d [tbl_name]
+
+--------------------------------------------------------------------------------------------------------------------
+-- Comandos postgres
+--------------------------------------------------------------------------------------------------------------------
+
+-> Eliminar base de datos
+DROP DATABASE [db_name];
+
+-> Eliminar todos los registros de una tabla
+DELETE FROM [tbl_name];
+
+-> Listar informacion de clientes y acciones sobre la base de datos
+SELECT * FROM pg_stat_activity;
+
+
+

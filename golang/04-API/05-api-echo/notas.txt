@@ -1,0 +1,19 @@
+JWT
+- Json Web Token
+- Son un método estandar abierto de la industria RFC 7519 para presentar solicitudes de forma segura entre dos partes
+
+Para generar JWT
+- Se requieren certificados
+- Estos certificados son archivos que permiten identificar a una persona/entidad de forma única
+
+certificados
+- Genralmente hay dos tipos
+ - Privado: No se debe compartir y sirve para firmar las peticiones
+ - Público: Se debe compartir y sirve para confirmar la firma de una peticion 
+
+
+Generar certificados
+- Crear carpeta certificados en la rama del main.go
+- Comandos:
+  openssl genrsa -out app.rsa 1024 // certificado Privado 1024 bytes   -rw-------
+  openssl rsa -in app.rsa -pubout > app.rsa.pub // certificado publico -rw-rw-r--

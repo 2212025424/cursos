@@ -1,0 +1,55 @@
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--| Conceptos
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+RESTful
+- Representational State Transfer
+- Todo lo que se mueve en la red es un recurso 
+- Todo recurso es representado por un formato 
+- Todo recurso debe tener un identificador único (URIs)
+- Siempre deben ser accedidos a travez de métodos estandar (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS)
+- Los recursos pueden tener varias representaciones
+- Comunicaciones sin estado
+
+Verbose HTTP 
+- GET       Obtener recursos
+- POST      Guardar recurso
+- PUT       Actualziar todo el recurso
+- PATCH     Actualziar una parte del recurso
+- DELETE    Eliminar recurso
+- HEAD      Comprobar la existencia de un recurso
+- OPTIONS   Sólo lo emplean los navegadores
+
+Códigos de respuesta
+- 1XX   Informativas
+- 2XX   Éxito
+- 3XX   Redirección
+- 4XX   Error de cliente
+- 5XX   Error de servidor
+- Mayores de 599 no oficiales en la documentación
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--| Paquete HTTP GOLAND
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+HTTP
+- Sirve para crear servidores como clientes
+- Servidores: permiten recibir peticiones HTTP
+- clientes: permiten realizar peticiones HTTP
+
+ServeMux
+- Sirve como router (enrutadores)
+- compara peticiones http para definir el handler que debe ejecutarse 
+
+Handler
+- Responsables de escribir la respuesta al cliente
+- Envia encabezados y cuerpos 
+- Funcion que se encarga de escribir al usuario las peticiones que nos hace
+
+Handlers predefinidos
+- FileServer
+- NotFoundHandler
+- RedirectHandler
+- StripPrefix
+- TimeoutHandler

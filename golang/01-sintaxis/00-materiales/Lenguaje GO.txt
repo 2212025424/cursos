@@ -1,0 +1,99 @@
+--------------------------------------------------------------------------------------------------------------------------------
+-- Introduccion de GO
+--------------------------------------------------------------------------------------------------------------------------------
+-> Creado por Google en 2007 
+-> En novimbre de 2009 se lanza la primera versión
+-> Surge de la necesidad de las empresa de combinar la seguridad y rendimiento de los lenguajes compilados con la facilidad de 
+   los lenguajes interpretados
+
+Lenguaje compilado:
+-> Escribes el código en lenguaje entendible y el compilador lo pasa a lenguaje máquina
+-> Compiladores lentos
+-> No multiplataforma
+
+Lenguaje interpretado:
+-> Si se tiene el interpréte, el código entendible por humanos es ejecutado por la máquina
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Comandos GO
+--------------------------------------------------------------------------------------------------------------------------------
+go mod init [name]
+-> Ejecuta y crea el archivo go.mod
+
+go mod tidy 
+-> Descarga las dependencias
+-> Eliminar las dependencias que no se están empleando
+
+go run main.go
+-> Ejecuta el archivo
+
+go build
+-> Contruye la app en archivo binario
+-> Identifica paqetes faltantes
+
+go get [package]
+-> Descarga el paquete 
+
+go get [package]@version
+-> Instala la version en específico
+
+go doc --all
+-> Con un código bien documentado, con este comando podemos extender la documentación
+
+go list -m all
+-> Imprime la lista de las dependencias
+
+go mod why [package]
+-> Imprime donde se está empleando el paquete
+
+go list -m -versions [package]
+-> Imprime las versiones del paquete 
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Versionamiento en GO
+--------------------------------------------------------------------------------------------------------------------------------
+Todas las versiones se componen por la siguiente nomeclatura
+
+v    2    .    4    .    10    -alpha
+   mayor     minor      patch pre-release
+
+v0.0.0 
+-> Paquete en desarrollo, no se debe considerar estable
+
+v1.0.0
+-> Versión del paquete público "versión incial"
+
+PATCH 
+-> Se actualiza de uno en uno cuando se trata de correción de bugs (contemplando que la nueva version es compatible con la anterior)
+-> ejemplo versionado
+   v1.0.0
+   v1.0.1
+   v1.0.2
+   v1.0.3
+
+MINOR
+-> Se incrementa cuando se agregan nuevas fncionalidades con nuevas características
+-> Cuado se actualiza esta seccion, el PATCH debe reiniciar en 0
+-> Ejemplo de versionado
+   v1.0.3   ->  antes
+   v1.1.0
+   v1.2.0
+
+MAYOR
+-> Se incrementa cuando se actualiza a una version no compatible con la anterior
+-> Ejemplo de versionado
+   v1.2.0   ->  antes
+   v2.0.0
+   v3.0.0
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- POO GO
+--------------------------------------------------------------------------------------------------------------------------------
+Paradigmas de la POO
+-> Abstracción: Proceso mediante el cual se extraen las características de un objeto/persona (tangible o no)
+-> Encapsulamiento: Característica para proteger las propiedades o métodos de una clase (modificadores de acceso)
+-> Herencia: Reutilizar código mediante la herencia de características y métodos
+-> Polimorfismo: Provee una característica de poner en función objetos diferentes de una misma forma. 

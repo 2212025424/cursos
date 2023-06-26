@@ -1,0 +1,110 @@
+--------------------------------------------------------------------------------------------------------------------------------
+-- Métodos HTTP
+--------------------------------------------------------------------------------------------------------------------------------
+GET: Obtener información del servidor
+POST: Agregar recurso
+PUT: Actualizar un recurso
+DELETE: Eliminar un recurso
+PATCH: Actualizar temporalmente un recurso "poco usado"
+HEADER: Consultar existencia de un recurso 
+OPTIONS: Empleado por navegadores de forma nativa 
+
+CORS: Permitir o no las conexiones de un dominio a otro
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Coódigo de respuesta HTTP
+--------------------------------------------------------------------------------------------------------------------------------
+100 - 199: Informativos
+200 - 299: Correcto
+300 - 399: Redirección
+400 - 499: Error del cliente
+500 - 599: Error del servidor
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- REST
+--------------------------------------------------------------------------------------------------------------------------------
+Significado: Transferencia de estado transaccional
+
+REST: es una arquitectura que se basa en el protocolo HTTP para ejecutarse
+
+Propiedades REST:
+-> Todo en la web es un recurso 
+-> Todo recurso debe tener identificador único "URI"
+-> Todo recurso debe estar en un formato en específico
+-> Los recursos pueden representarse en distintos formatos
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- URI
+--------------------------------------------------------------------------------------------------------------------------------
+Compuesta por URL o URN
+
+URL Compuesta por: 
+-> HTTP: Protocolo de comunicación
+-> S: Identificador de servidor con certificado digital
+-> Dominio: Identificador de empresa
+-> PATH: Identificador de recurso
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Content types
+--------------------------------------------------------------------------------------------------------------------------------
+Como procesar la información
+-> text/plain: Texto plano
+-> text/html: Todo con HTML para páginas web
+-> text/xml: Recursos XML
+-> application/json: Formato JSON
+-> image/jpeg: Formato de imagen
+
+XML es muy poco eficiente, pero válido "Para aplicaciones contecnologías anteriores"
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Cookies y tokens
+--------------------------------------------------------------------------------------------------------------------------------
+-> Todas las comunicaciones son sin estado --> Cada petición es diferente, no hay relación entre peticiones
+-> Empleadas cuando en una API se hace un login y el server retorna una cadena (cookie/token) que la app tiene que enviar en cada 
+   solicitud y así lograr tener acceso a los recursos.
+
+Token: 
+-> Archivo de texto que se genera en el servidor, donde va la info de la persona que se ha logeado y el servidor los firma
+-> Si hace alguna modificación la firma ya no vale y por ende las credenciales
+-> Se emplean en navegador y en apps que se ejecutan desde el backend
+
+Cookie:
+-> Se emplea más en los navegadores
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Idempotencia
+--------------------------------------------------------------------------------------------------------------------------------
+-> "Aunque se realice una acción muchas veces, la respuesta siempre será la misma"
+-> Aplica para los métodos HTTP, únicamente (GET, PUT, DELETE)
+
+Porque la idempotencia en estos métodos
+-> GET: porque ante la misma petición siempre retornará la misma información
+-> PUT: Al intentar actualizar un registro con la misma soliitud, siempre tendremos el mismo registro
+-> DELETE: exista o no el recurso a eliminar siempre tendremos la misma respuesta 
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+-- Hateoas ~ heitous
+--------------------------------------------------------------------------------------------------------------------------------
+-> Empleada cuando "los recursos no son autodescriptivos"
+-> Debido a que en las API no hay una autodescripción
+-> Es una forma en la que podemos auxiliar la búsqueda de un siguiente, anterior o el mismo elemento.
+
+Ejemplo: 
+{
+  "person": {
+    "name": "enrique",
+    "age": "23",
+    "links": {
+      "self": "id-03",
+      "preview": "id-02",
+      "next": "id-04"
+    }
+  }
+}
+

@@ -1,0 +1,44 @@
+------------------------------------------------------------------------------------------------------------------------
+-- Comandos SQL iniciales
+------------------------------------------------------------------------------------------------------------------------
+
+-> Creamos carpeta de bd y cambiamos permisos
+mkdir crud-go-db
+chown -R postgres crud-go-db
+chgrp -R postgres crud-go-db
+
+-> Agregamos el usuario a la configuracion de postgres [pg_hba.conf]
+host    crudgodb        usercrudgo      0.0.0.0/0               md5
+
+-> Reiniciamos el servicio de postgres
+/etc/init.d/postgresql restart
+
+-> Creamos el usuario de la base de datos
+CREATE USER usercrudgo PASSWORD 'usercrudgo';
+
+-> Creamos el tablespace y lo asignamos a la ruta creada
+CREATE TABLESPACE ts_crudgo OWNER usercrudgo LOCATION E'/var/databases/crud-go-db';
+
+-> Creamos la base de datos
+CREATE DATABASE crudgodb OWNER = usercrudgo TABLESPACE = ts_crudgo;
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Mysql configuracion
+------------------------------------------------------------------------------------------------------------------------
+
+-> Instalacion de Mysql 
+sudo apt install mysql-server
+
+-> Cambiamos pass para usuario root
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '$dev/E_c0n_db';
+
+-> Creamos un nuevo usuario
+CREATE USER 'usercrudgo'@'%' IDENTIFIED BY '$dev/E_c0n_db';
+
+-> creamos la base de datos
+CREATE DATABASE crudgodb;
+
+-> Otorgamos los permisos al usuario
+GRANT ALL PRIVILEGES ON crudgodb.* TO 'usercrudgo'@'%' WITH GRANT OPTION;

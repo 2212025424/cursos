@@ -1,0 +1,92 @@
+Por qué es importante el testing automáico
+-> Automatiza procesos de prueba
+-> Ayuda a evitar errores manuales
+-> Ayuda a encontrar los errores
+
+Para esto es necesario un registro de pruebas amplio para encontrar todos los detalles
+
+Convenciones para test automáico
+-> Archivos que terminen en ([filename] + _test.go)
+-> Que las funciones comiencen con (Test + [NameFuncToTest])
+
+Comandos
+-> Ejecutar todas las pruebas
+go test
+-> Ejecutar una prueba que contengan el nombre
+go test -run [FuncName]
+-> Ejecutar funciones que terminen con na cadena
+go test -run [FuncName]$
+-> Mostrar todos los logs del test
+go test -v 
+-> Ejecutar test de manera recursiva
+-> Son usados para test unitario, con test de integración colapsaria
+go test ./...
+
+
+Hacer el testing por paquetes indepedientes (sólo si se tiene tests de integración)
+{ // testing.sh
+#!/bin/sh
+for d in $(go list ./...); do
+	echo "Testeando el paquete $d"
+	go test -v $d
+done
+}
+
+
+-> Mostrar errores (con Log y Fail)
+t.Logf("ERRROR: Se esperaba %d, se obtuvo: %d", want, got)
+t.Fail()
+-> Mostrar errores (con Errorf())
+t.Errorf("ERRROR: Se esperaba %d, se obtuvo: %d", want, got)
+
+NOTA: Los Log son más usados para hacer el debug
+NOTA: Con Error, si hay flla muestra los log, sino los omite
+
+Ejecutar todas las funciones de rendimiento con bench
+-> go test -bench=.
+Ejecutar las funciones de rendimiento bench que inicien con una cadena
+-> go test -bench=BenchmarkFibonacci
+
+Ejecutar una opcion nombrada de una tabla
+-> go test -run TestMultiply/2x1
+
+Hay test unitarios y de integración
+Unitarios
+-> Se desarrollan a funciones que no tienen dependencias de terceros
+-> Se pueden o no crear mocks que simulan respuestas de alguna peticion
+Integracion
+-> Aquellos que dependen de algun servicio (base de datos, api terceros)
+
+
+
+
+-> Saber porcentaje de test a un proyecto
+go test -coverprofile=profile.out
+
+-> Saber el porcentaje de test por paquetes a funcionalidad
+go tool cover -func=profile.out
+
+-> Saber por funcion a qué nos falta hacer test y que no
+go tool cover -html=profile.out
+
+
+
+
+
+
+
+
+
+
+
+
+Curso con temas de interés, pero sobre todo temas que se emplean en la actualidad, sabía la importancia de los mismos para la mejora de las funcionalidades de un proyecto, pero no había hecho alguno de forma automatizada, todo manual y a criterio. Desde mi punto de vista nos han dado todas las bases para lograr un test de buen nivel, aunque sí me hubiera gustado una práctica más elaborada de "testing de integración" con mirada en el rendimiento. 
+
+
+
+ayuda para la mejora de las funcionalidades en el desarrollo. Ya tenía en cuenta que los test se podían automatizar, pero nunca lo había intentado por no saber del tema, y más cuando logramos saber con comandos qué es lo que falta testear. Nos han dado desde mi punto de vista todas las bases necesarias para un test de buen nivel, pero sí me hubiera gustado que trabajaran una práctica de "test integración" más elaborada. 
+
+
+
+
+

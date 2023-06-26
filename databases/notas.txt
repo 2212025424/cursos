@@ -1,0 +1,73 @@
+--------------------------------------------------------------------------------------------------------------------
+-- Bases de datos conceptos
+--------------------------------------------------------------------------------------------------------------------
+
+Base de datos
+-> COnjunto de informacion organizada que cumplen un objetivo en común
+-> Desde un punto tecnológico, debe estar almacenada en un medio electrónico/digital
+
+Características
+-> Versatil en la representación de la informacion
+-> Desempeño (Cumplir con la nececidad del cliente en tiempos adecuados)
+-> Mínima redundancia (No datos duplicados (únicamente en las bd relacionales))
+-> Capacidad de acceso (Compartida y concurrente)
+-> Simple (se accede y opera de manera Simple)
+-> Integra (La informacion debe ser verás, perdurar en el tiempo, coherencia en los datos)
+-> Seguridad y privacidad
+
+
+Es un sistema gestor de base de datos (SGBD), la cual nos permite 
+-> Crear
+-> modificar
+-> Poblar
+-> Actualizar
+-> Seleccionar
+-> Borrar
+-> Administrar privilegios
+
+SGBD Relacionales
+-> MySQL
+-> MariaDB
+-> SQL Server 
+-> Oracle
+-> DB2
+-> Informix
+
+SGBD No Relacionales
+-> MongoDB
+-> FireBase
+-> CouchDB
+-> Neo4j
+-> Cassandra
+
+--------------------------------------------------------------------------------------------------------------------
+-- Nor malizacion en base de datos
+--------------------------------------------------------------------------------------------------------------------
+
+Se utiliza para verificar si la base de datos no tiene problemas como:
+-> redundancia
+-> Problemas de
+ - Inserción
+ - Actualización
+ - Borrado
+
+Formas normales
+-> 1FN
+ - Cada atributo es simple 
+ - Cada atributo es monovaluado (máximo un valor)
+-> 2FN
+ - Se encuentra en 1FN
+ - Cada atributo no principal tiene un DF de la clave candidata (cada campo de la tabla depende del principal)
+-> 3FN
+ - Se encuentra en 2FN
+ - No existe atributo no principal que dependa transitivamente de la clave candidata
+-> FNBC
+ - Sí y sólo si todo determinante es clave candidata
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Nor malizacion en base de datos
+--------------------------------------------------------------------------------------------------------------------
+
+Dependecias funcionales
+-> Toda clave primaria tiene información con relación directa

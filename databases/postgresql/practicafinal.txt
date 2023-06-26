@@ -1,0 +1,381 @@
+--------------------------------------------------------------------------------------------------------------------
+-- Lógica de negocio
+--------------------------------------------------------------------------------------------------------------------
+
+Tabla compras
+-> El precio de cada uno de los articulo se cambia en cada una de las compras
+-> Establecer si se coloca el total pagado por los producto o por cada una de las piezas
+
+--------------------------------------------------------------------------------------------------------------------
+-- Configuración inicial
+--------------------------------------------------------------------------------------------------------------------
+
+-> Creamos la carpeta que contendrá la base de datos
+mkdir schooldb
+
+-> Cambiamos el usuario
+chown -R postgres schooldb
+chgrp -R postgres scholdb
+
+-> Creamos el usuario para la base de datos
+CREATE USER userschool PASSWORD 'userschool';
+
+-> Creamos el tablespace
+CREATE TABLESPACE ts_school OWNER userschool LOCATION E'/var/databases/schooldb';
+
+-> Creamos la base de datos, asignamos el dueño y el tablespace
+CREATE DATABASE schooldb OWNER = userschool TABLESPACE = ts_school;
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Creamos las tablas
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE perfiles(
+	id_perfil smallserial,
+	perfil varchar(20) not null,
+	CONSTRAINT pk_perfiles PRIMARY KEY (id_perfil),
+	CONSTRAINT uk_perfiles UNIQUE (perfil)
+);
+
+CREATE TABLE usuarios (
+	id_usuario smallserial,
+	usuario varchar(20) NOT NULL,
+	nombre varchar(100) NOT NULL,
+	clave varchar(32) NOT NULL,
+	id_perfil smallint,
+	CONSTRAINT pk_usuarios PRIMARY KEY (id_usuario),
+	CONSTRAINT uk_usuarios UNIQUE (usuario),
+	CONSTRAINT fk_usuarios_perfiles FOREIGN KEY (id_perfil)
+	REFERENCES perfiles (id_perfil) ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+CREATE TABLE terceros (
+    id_tercero smallserial,
+    identificacion varchar(20) NOT NULL,
+    nombre varchar(100) NOT NULL,
+    direccion varchar(100) NOT NULL,
+    telefono varchar(20) NOT NULL,
+    CONSTRAINT pk_terceros PRIMARY KEY (id_tercero),
+    CONSTRAINT uk_terceros UNIQUE (identificacion)
+);
+
+CREATE TABLE productos (
+    id_producto smallserial,
+    nombre varchar(20) NOT NULL,
+    cantidad smallint,
+    precio smallint,
+    id_usuario smallint,
+    CONSTRAINT pk_productos PRIMARY KEY (id_producto),
+    CONSTRAINT uk_productos UNIQUE (nombre),
+    CONSTRAINT fk_productos_usuarios FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id_usuario) 
+            ON UPDATE RESTRICT
+            ON DELETE RESTRICT,
+    CONSTRAINT ck_cantidad CHECK (cantidad >= 0),
+    CONSTRAINT ck_precio CHECK (precio > 0)
+); 
+
+ALTER TABLE productos DROP CONSTRAINT ck_cantidad;
+ALTER TABLE productos ADD CONSTRAINT ck_cantidad CHECK (cantidad >= 0);
+ALTER TABLE productos ALTER COLUMN precio SET DATA TYPE real;
+
+CREATE TABLE compras (
+    id_compra smallserial,
+    fecha date DEFAULT now() NOT NULL,
+    id_tercero smallint NOT NULL,
+    id_producto smallint NOT NULL,
+    cantidad smallint NOT NULL,
+    valor smallint NOT NULL,
+    id_usuario smallint NOT NULL,
+    CONSTRAINT pk_compras PRIMARY KEY (id_compra),
+    CONSTRAINT fk_compras_terceros FOREIGN KEY (id_tercero)
+        REFERENCES terceros (id_tercero)
+            ON DELETE RESTRICT
+            ON UPDATE RESTRICT,
+    CONSTRAINT fk_compras_productos FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto)
+            ON DELETE RESTRICT
+            ON UPDATE RESTRICT,
+    CONSTRAINT fk_compras_usuarios FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id_usuario)
+            ON DELETE RESTRICT
+            ON UPDATE RESTRICT,
+    CONSTRAINT ck_compras_cantidad CHECK (cantidad > 0),
+    CONSTRAINT ck_compras_valor CHECK (valor > 0)
+);
+
+CREATE TABLE ventas (
+    id_venta smallserial,
+    fecha date DEFAULT now() NOT NULL,
+    id_tercero smallint NOT NULL,
+    id_producto smallint NOT NULL,
+    cantidad smallint NOT NULL,
+    valor smallint NOT NULL,
+    id_usuario smallint NOT NULL,
+    CONSTRAINT pk_ventas PRIMARY KEY (id_venta),
+    CONSTRAINT fk_ventas_terceros FOREIGN KEY (id_tercero)
+        REFERENCES terceros (id_tercero)
+            ON DELETE RESTRICT
+            ON UPDATE RESTRICT,
+    CONSTRAINT fk_ventas_productos FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto)
+            ON DELETE RESTRICT
+            ON UPDATE RESTRICT,
+    CONSTRAINT fk_ventas_usuarios FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id_usuario)
+            ON DELETE RESTRICT
+            ON UPDATE RESTRICT,
+    CONSTRAINT ck_ventas_cantidad CHECK (cantidad > 0),
+    CONSTRAINT ck_ventas_valor CHECK (valor > 0)
+);
+
+CREATE TABLE auditoria (
+    id_auditoria smallserial,
+    fecha timestamp NOT NULL DEFAULT now(),
+    id_usuario smallint NOT NULL,
+    accion varchar(20) NOT NULL,
+    tabla varchar(20) NOT NULL,
+    anterior json NOT NULL,
+    nuevo json,
+    CONSTRAINT pk_auditoria PRIMARY KEY (id_auditoria)
+);
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Insertamos los valores
+--------------------------------------------------------------------------------------------------------------------
+
+INSERT INTO perfiles (perfil) VALUES ('ADMINISTRADOR'), ('CAJERO');
+
+INSERT INTO usuarios (usuario, nombre, clave, id_perfil) VALUES 
+    ('kikezempo', 'Jose Enrique', md5('clave123+'), 1),
+    ('mfernanda', 'Maria Fernanda', md5('clave123+'), 2);
+
+INSERT INTO terceros (identificacion, nombre, direccion, telefono) VALUES
+    ('202200001', 'PROVETO SA de CV', 'CALLE MIRAMON 171', '2212025424'),
+    ('202200002', 'E-CONSULTA.COM', 'CAMINO SEGUNDA 17', '2252665154'),
+    ('202200003', 'FACILITADORAS', 'PRINCIPAL 5 MAYO', '2856675134');
+
+INSERT INTO productos (nombre, cantidad, precio, id_usuario) VALUES
+    ('LICUADORA', 10, 800.99, 1),
+    ('LAVADORA', 5, 5400.99, 2),
+    ('SECADORA', 15, 7850.90, 1),
+    ('LAPTOP', 7, 19998.98, 1);
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Creamos las funciones a consumir desde el backend
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION consulta_terceros () 
+    RETURNS SETOF terceros AS
+    $BODY$
+        BEGIN
+            RETURN QUERY SELECT id_tercero, identificacion, nombre, direccion, telefono FROM terceros ORDER BY nombre;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+ALTER FUNCTION consulta_terceros () OWNER TO userschool;
+
+CREATE OR REPLACE FUNCTION consulta_productos ()
+    RETURNS SETOF productos AS
+    $BODY$
+        BEGIN
+            RETURN QUERY SELECT id_producto, nombre, cantidad, precio, id_usuario FROM productos ORDER BY nombre;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION autenticacion (_usuario character varying, _clave character varying)
+    RETURNS TABLE (id_usuario smallint, nombre character varying, id_perfil smallint, perfil character varying) AS
+    $BODY$
+        BEGIN
+            RETURN QUERY SELECT a.id_usuario, a.nombre, b.id_perfil, b.perfil
+            FROM usuarios AS a NATURAL JOIN perfiles AS b
+            WHERE a.usuario = _usuario AND a.clave = md5(_clave);
+            IF NOT FOUND THEN 
+                RAISE EXCEPTION 'El usuario o la contraseña no coinciden';
+            END IF;
+        END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION comprar (
+        _proveedor smallint,
+        _producto smallint,
+        _cantidad smallint,
+        _valor real,
+        _usuario smallint
+    ) RETURNS smallint AS
+    $BODY$
+    DECLARE 
+        _idfactura smallint;
+    BEGIN
+        INSERT INTO compras (id_tercero, id_producto, cantidad, valor, id_usuario) 
+        VALUES(_proveedor, _producto, _cantidad, _valor, _usuario) 
+        RETURNING id_compra INTO _idfactura; --Almacena el id en la variable declarada
+        IF FOUND THEN 
+            UPDATE productos 
+            SET cantidad = cantidad + _cantidad, precio = _valor, id_usuario = _usuario 
+            WHERE id_producto = _producto;
+        ELSE
+            RAISE EXCEPTION 'No fue posible registrar la compra';
+        END IF;
+        RETURN _idfactura;
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+SELECT comprar (2::smallint, 1::smallint, 20::smallint, 700::real, 2::smallint);
+
+CREATE OR REPLACE FUNCTION vender (
+        _cliente smallint,
+        _producto smallint,
+        _cantidad smallint,
+        _usuario smallint
+    ) RETURNS smallint AS
+    $BODY$
+    DECLARE
+        _valor real;
+        _existencia smallint;
+        _idfactura smallint;
+    BEGIN
+        SELECT precio * 1.3, cantidad INTO STRICT _valor, _existencia FROM productos WHERE id_producto = _producto;
+        IF _existencia >= _cantidad THEN 
+            INSERT INTO ventas (id_tercero, id_producto, cantidad, valor, id_usuario)
+                VALUES (_cliente, _producto, _cantidad, _valor, _usuario)
+                RETURNING id_venta INTO _idfactura;
+            IF FOUND THEN 
+                UPDATE productos
+                    SET cantidad = cantidad - _cantidad, id_usuario = _usuario
+                    WHERE id_producto = _producto;
+            ELSE
+                RAISE EXCEPTION 'Ha ocurrido un error al registrar la venta';
+            END IF;
+        ELSIF _existencia = 0 THEN
+            RAISE EXCEPTION 'Este producto está agotado';
+        ELSE
+            RAISE EXCEPTION 'No hay suficiente cantidad para vender, lim: %', _existencia;
+        END IF;
+        RETURN _idfactura;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                RAISE EXCEPTION 'No existe el articulo a vender';
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+SELECT vender(2::smallint, 4::smallint, 10::smallint, 1::smallint);
+
+CREATE OR REPLACE FUNCTION consult_ventas (_limite smallint, _pagina smallint) 
+    RETURNS TABLE (id_venta smallint, fecha date, cliente character varying, producto character varying, cantidad smallint, valor real) AS
+    $BODY$
+    DECLARE
+        _inicio smallint;
+    BEGIN
+        _inicio = _limite * _pagina - _limite;
+        RETURN QUERY 
+            SELECT 
+                v.id_venta, 
+                v.fecha, 
+                t.nombre as proveedor, 
+                p.nombre as producto, 
+                v.cantidad, 
+                v.valor  
+            FROM 
+                ventas AS v INNER JOIN terceros AS t 
+                    ON v.id_tercero = t.id_tercero
+                INNER JOIN productos AS p
+                    ON p.id_producto = v.id_producto
+            LIMIT _limite OFFSET _inicio;
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION consulta_compras (_limite smallint, _pagina smallint) 
+    RETURNS TABLE (id_compra smallint, fecha date, cliente character varying, producto character varying, cantidad smallint, valor real) AS
+    $BODY$
+    DECLARE
+        _inicio smallint;
+    BEGIN
+        _inicio = _limite * _pagina - _limite;
+        RETURN QUERY 
+            SELECT 
+                c.id_compra, 
+                c.fecha, 
+                t.nombre as cliente, 
+                p.nombre as producto, 
+                c.cantidad, 
+                c.valor  
+            FROM 
+                compras AS c INNER JOIN terceros AS t 
+                    ON c.id_tercero = t.id_tercero
+                INNER JOIN productos AS p
+                    ON p.id_producto = c.id_producto
+            LIMIT _limite OFFSET _inicio;
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Creamos los triggers que registrarán las acciones sobre la base de datos
+--------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE FUNCTION tg_productos_auditoria()
+    RETURNS TRIGGER AS
+    $BODY$
+    BEGIN
+        IF TG_OP = 'UPDATE' THEN
+            INSERT INTO auditoria (id_usuario, accion, tabla, anterior, nuevo)
+            SELECT NEW.id_usuario, 'ACTUALIZAR', 'PRODUCTO', row_to_json(OLD.*), row_to_json(NEW.*);
+        END IF;
+        RETURN NEW;
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER tg_productos_auditoria
+    AFTER UPDATE ON productos
+    FOR EACH ROW EXECUTE PROCEDURE tg_productos_auditoria();
+
+
+CREATE OR REPLACE FUNCTION tg_compras_auditoria ()
+    RETURNS TRIGGER AS
+    $BODY$
+    BEGIN
+        IF TG_OP = 'INSERT' THEN
+            INSERT INTO auditoria (id_usuario, accion, tabla, anterior, nuevo)
+            VALUES NEW.id_usuario, 'INSERTAR', 'COMPRAS', row_to_json(NEW.*), null;
+        END IF;
+        RETURN NEW;
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER tg_compras_auditoria
+    AFTER INSERT ON compras
+    FOR EACH ROW EXECUTE PROCEDURE tg_compras_auditoria();
+
+
+CREATE OR REPLACE FUNCTION tg_ventas_auditoria ()
+    RETURNS TRIGGER AS
+    $BODY$
+    BEGIN
+        IF TG_OP = 'INSERT' THEN
+            INSERT INTO auditoria (id_usuario, accion, tabla, anterior, nuevo)
+            SELECT NEW.id_usuario, 'INSERTAR', 'VENTAS', row_to_json(NEW.*), null;
+        END IF;
+        RETURN NEW;
+    END;
+    $BODY$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER tg_ventas_auditoria
+    AFTER INSERT ON ventas
+    FOR EACH ROW EXECUTE PROCEDURE tg_ventas_auditoria();
+

@@ -1,0 +1,223 @@
+------------------------------------------------------------------------------------------------------------------------
+-- Iniciar un proyecto de go
+------------------------------------------------------------------------------------------------------------------------
+
+-> Iniciar proyecto
+go mod init [name]
+
+-> Instalar dependencias de terceros
+go mod tidy
+
+-> Correr programa
+go run main.go
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Conexion a la base de datos
+------------------------------------------------------------------------------------------------------------------------
+
+package main
+
+import (
+	"fmt" 
+	"database/sql"
+	_ "github.com/lib/pq"
+)
+
+const (
+	DB_HOST = "208.68.37.200"
+	DB_USER = "usertaller"
+	DB_PASS = "usertaller"
+	DB_NAME = "tallerdb"
+	DB_SSLM = "disable"
+)
+
+func main () {
+	conn := fmt.Sprintf("dbname=%s host=%s user=%s password=%s sslmode=%s", DB_NAME, DB_HOST, DB_USER, DB_PASS, DB_SSLM)
+
+	db, err := sql.Open("postgres", conn)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Se ha abierto la conexion")
+	}
+}
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Comandos SQL
+------------------------------------------------------------------------------------------------------------------------
+
+Consultas a la base de datos
+-> SELECT
+ - Query()			"Devuelve sólo resultados, siempre que la consulta requiera retornar filas"
+ - QueryContext()	"Recibe un contexto"
+ - QueryRow() 		"Devuelve una única fila"
+
+Modificaciones a la base de datos
+-> INSERT
+-> UPDATE
+-> DELETE
+-> CREATE
+-> DROP
+-> ALTER
+ - Exec()
+ - ExecContext()
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Procesando resultados Exec() for INSERT
+------------------------------------------------------------------------------------------------------------------------
+
+res, err := db.Exec("INSERT INTO productos(name) VALUES($1)", "CURSO GO")
+if err != nil {
+	log.Fatal(err)
+}
+
+id, err := res.LastInsertId()
+if err != nil {
+	log.Fatal(err)
+}
+
+rowsCount, err := res.RowsAffected()
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println("LastInsertId: %d, RowsAffected: %d \n", id, rowsCount)
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Procesando resultados Query() for SELECT
+------------------------------------------------------------------------------------------------------------------------
+
+Notas
+-> Emplear siempre que se esperen filas
+-> No olvidar cerrar la conexion después de la consulta
+
+rows, err := db.Query("SELECT id, name FROM productos")
+if err != nil { ... }
+defer rows.Close()
+
+for rows.Next() {
+	var id uint 
+	var name string
+
+	if err := rows.Scan(&id, &name); err != nil {
+		...
+	}
+
+	fmt.Println(id, name)
+}
+
+if err := rows.Err(); err != nil {
+
+}
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Procesando resultados QueryRow() for SELECT
+------------------------------------------------------------------------------------------------------------------------
+
+product := Produtc{}
+
+err := db.QueryRow("SELECT id, name FROM productos WHERE id = $1", 6).Scan(
+	&product.ID,
+	&product.Name 
+)
+
+switch {
+	case err == sql.ErrNoRows: 
+		log.Print("No hay productos con ese id")
+	case err != nil:
+		log.Print(err)
+	default:
+		log.Printf("Producto -> ID: %d, Name: %s", product.ID, product.Name)
+}
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Declaraciones preparadas
+------------------------------------------------------------------------------------------------------------------------
+
+Notas
+-> Indicar a la base de datos las instrucciones que debe ejecutar y posterios pasarle los parámetros
+-> Ejecutar la misma instruccion el número de veces que se requiera
+-> Evitamos ataques de inyección sql, debido a que la base de datos ya sabe que acciones realizar y sólo espera argumntos
+
+smtp, err := db.Prepare("INSERT INTO productos (name, location) VALUES ($1, $2)")
+if err != nil { ... }
+smt.Close()
+
+res, err := smtp.Exec("Curso GO", "Puebla")
+if err != nil { ... }
+
+id, err := res.LastInsertId()
+if err != nil { ... }
+
+rowsAff, err := res.RowsAffected()
+if err != nil { ... }
+
+res, err := smtp.Exec("Curso GO", "Puebla")
+....
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Transacciones en GO 
+------------------------------------------------------------------------------------------------------------------------
+
+tx, err := db.Begin()
+if err != nil { ... }
+
+smtpInvoice, err := tx.Prepare("INSERT INTO invoices (cliente) VALUES (?)")
+if err != nil { tx.RollBack() }
+defer smtpInvoice.Close()
+
+invRes, err := smtpInvoice.Exec("Enrique")
+if err != nil { tx.RollBack() }
+
+invID, err := invRes.LastInsertId()
+if err != nil { tx.RollBack() }
+
+rowsAff, err := invRes.RowsAffected()
+if err != nil { tx.RollBack() }
+
+smtpItem, err := tx.Prepare("INSERT INTO invoices_item (invoice_id, product, price) VALUES (?, ?)")
+if err != nil { tx.RollBack() }
+defer smtpItem.Close()
+
+_, err := smtpItem.Exec(invID, "REFRI", 20.30)
+if err != nil { tx.RollBack() }
+
+tx.Commit()
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+-- Escanear campos nulos de la base de datos
+------------------------------------------------------------------------------------------------------------------------
+
+typeof Product struct { Name string }
+
+for rows.Next() {
+	var nameNull sql.NullString
+	p := Product{}
+
+	err := rows.Scan(nameNull)
+
+	p.Name = nameNull.String
+}

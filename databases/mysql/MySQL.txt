@@ -1,0 +1,323 @@
+--------------------------------------------------------------------------------------------------------------------
+-- MySQL conceptos
+--------------------------------------------------------------------------------------------------------------------
+Es un SGBD
+-> Sistema gestor de base de datos
+-> Popular en entornos web
+-> Código abierto
+-> Con un buen rendimiento
+
+Características
+-> Multiplataforma
+-> Codigo abierto
+-> Relacional
+-> Velocidad
+-> Multiconecciones
+
+Porpiedades ACID
+-> Garantizan que las transacciones de una BD se hacen de manera confiable
+A> Atomicidad: un cambio debe completarse en su totalidad o no modificar nada en absoluto.
+C> Consistencia: cualquier cambio debe conducir de un estado válido de la base de datos a otro estado válido.
+I> Aislamiento: un cambio no debe afectar a otros, que se estén ejecutando al mismo tiempo sobre la base de datos.
+D> Durabilidad: los cambios deben conservarse, aunque se produzcan fallos en la base de datos o el sistema completo.
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Motores de almacenamiento MySQL
+--------------------------------------------------------------------------------------------------------------------
+INNODB
+-> Compatible con ACID 
+-> Transacciones
+-> Claves foráneas
+-> Recuperación ante fallos
+-> Bloqueo a nivel de fila
+
+MyISAM
+-> Motor original
+-> Buen performance
+-> Bloque a nivel tabla
+
+Menory
+-> Almacenamiento en memoria
+-> El más rápido
+-> Bloqueo a nivel de tabla
+
+CSV
+-> Almacenamiento en archivos csv
+-> Facilidad de integración con otras aplicaciones
+-> Bloque a nivel de tabla
+
+MERGE
+-> Almacenamiento en tabas MyISAM
+-> Útil para grandes volumenes de datos
+-> Bloqueo a nivel de tabla
+
+Archive
+-> Inserts de alta Velocidad
+-> Datos comprimidos
+-> Útil par informacion histórica
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Tipos de datos mysql 
+--------------------------------------------------------------------------------------------------------------------
+Numéricos
+-> Enteros 
+ - TINYINT
+ - SMALLINT
+ - MEDIUMYINT
+ - INT
+ - BIGINT
+-> Decimales
+ - DECIMAL
+ - FLOAT
+ - DOUBLE
+-> BIT
+
+Booleanos
+-> BIT
+-> BOOLEAN
+-> BOOL
+
+Alfanuméricos
+-> Texto libre
+ - CHAR
+ - VARCHAR
+ - TINYTEXT
+ - TEXT
+ - MEDIUMTEXT
+ - LONGTEXT
+-> Texto predefinido
+ - ENUM
+ - SET
+
+Fecha y hora
+-> DATE
+-> TIME
+-> DATETIME
+-> TIMESTAMP
+-> YEAR
+
+Binarios
+-> BINARY
+-> VARBINARY
+-> TINYBLOB
+-> BLOB
+-> MEDIUMBLOB
+-> LONGBLOB
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Comandos MySQL Linux
+--------------------------------------------------------------------------------------------------------------------
+-> Verificar estado del servicio mysql
+service mysql status
+
+-> Instalar mysql
+sudo apt Install mysql-server
+
+-> Detener el servicio mysql
+sudo service mysql stop
+
+-> Iniciar el servicio mysql
+sudo service mysql start
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Comandos MySQL 
+--------------------------------------------------------------------------------------------------------------------
+
+-> Iniciar cliente mysql
+sudo mysql
+mysql -u [user_name]
+
+-> Salir del cliente
+quit
+
+-> Mostrar bases de datos
+show databases;
+
+-> Cambiar direccion a una tabla
+use [tabla_name];
+
+-> Mostrar tablas
+show tables;
+
+-> Mostrar estructura de la tabla
+describe [table_name]
+
+-> Crear base de datos
+create database [name_db]
+
+-> Crear tabla
+create table [table_name] ([fills]) ENGINE=INNODB;
+
+-> Agregr columana a tabla
+alter table [table_name] add column [column_name] 
+
+-> Eliminar tabla
+drop table
+
+-> Eliminar base de datos
+dop database [db_name];
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Administración de usuarios MySQL
+--------------------------------------------------------------------------------------------------------------------
+Autenticacion
+-> Determinar si el usuario es quien dice ser
+autorizacion
+-> Que permisos tiene 
+
+Tipos de privilegios
+-> Administrativos: Manejo completo del servidor
+-> Base de datos: Manejo completo de una base de datos
+-> Objetos de BD: Permisos específicos de tablas, vistas, etc.
+
+-> Crear usuario
+create user 'user_name'@'localhost' identified by 'my_password';
+
+-> Asignar permisos a usuarios
+grant [ALL/INSERT/SELECT/DELETE/UPDATE] on [db_name].[*/[table_name]] to '[user_name]'@'host'
+
+-> Eliminar permiso
+revoke [INSERT/SELECT/DELETE/UPDATE] on [db_name].[*/[table_name]] to '[user_name]'@'host'
+
+-> Visuaizar permisos de usuario
+show grants for '[user_name]'@'host'
+
+-> ejecucion de comandos a traves del cliente
+mysql -u user -p[my_password] -e 'query'
+
+-> Desabilitar los chequeos de clave foraneas
+set FOREIGN_KEY_CHECKS = 0;
+
+-> Exportar una base de Datos
+mysqldump -u username -p database_name > data-dump.sql
+
+-> Inspeccionar archivo sql
+head -n 5 data-dump.sql
+
+-> Pasos para importar una base de Datos
+CREATE DATABASE new_database;
+use new_database;
+mysql -u username -p new_database < data-dump.sql
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Procedimientos almacenados MySQL
+--------------------------------------------------------------------------------------------------------------------
+-> Utilizan un caché del servidor
+-> Puede contener sentencias de control
+ - CASE, LOOP, IF
+
+Ventajas
+-> Menor tráfico de red
+-> Centralización de la lógica de negocio
+-> Base de datos más segura
+
+Desventajas
+-> Mayor consumo de recursos
+-> Deficultad para encontrar errores
+
+Permisos en los procedimientos almacenados
+-> CREATE ROUTINE
+-> ALTER ROUTINE
+-> EXECUTE
+
+--------------------------------------------
+Administracion de procedimientos almacenados
+--------------------------------------------
+--------------------------------> Crear
+DELIMITER //
+CREATE PROCEDURE procedure_name () 
+BEGIN 
+    SELECT * FROM products;
+END //
+
+DELIMITER ;
+
+--------------------------------> Llamar
+CALL procedure_name();
+
+--------------------------------> Eliminar
+DROP PROCEDURE procedure_name
+
+
+--------------------------------------------
+Ejemplo de procedimientos almacenados practico
+--------------------------------------------
+CREATE PROCEDURE insert_many (IN nrows INT)
+BEGIN
+    DECLARE counter INT DEFAULT 1;
+    WHILE counter < nrows DO
+        INSERT INTO user (name) values ('person_name');
+        SET counter = counter + 1;
+    END WHILE;
+END;
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Funciones mysql
+--------------------------------------------------------------------------------------------------------------------
+Definidas
+-> SUM
+-> MOD
+-> CONCAT
+Definidas por el usuario
+
+-> Sintaxis
+CREATE FUNCTION function_name 
+    RETURN {STRING/INTEGER/REAL/DECIMAL} [DETERMINISTIC / READS SQL DATA / NO SQL]
+
+
+--------------------------------------------
+Ejemplo de funciones almacenadas practico
+--------------------------------------------
+delimiter //
+
+create function function_name (clientId int) returns int reads sql data
+begin
+    declare promedio decimal(10, 2) default (select avg(amount) from transaction);
+    declare totalCliente decimal(10, 2) default (select sum(amount) from transaction where account_id = clientId);
+    if totalCliente < promedio then 
+        return (1)
+    elseif totalCliente = promedio then 
+        return (2)
+    else 
+        return(3)
+    end if;
+end //
+
+-> Se emplean en la claúsula select
+select function_name(clientId) from client;
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+-- Triggers en mysql 
+--------------------------------------------------------------------------------------------------------------------
+Uso 
+-> Rutinas
+-> Asociando a un evento en una tabla
+-> Antes o despues 
+
+--------------------------------------------
+Ejemplo de triggers almacenados practico
+--------------------------------------------
+DELIMITER // 
+CREATE TRIGGER unvalidate_negatives 
+    before insert 
+    on transaction for each row 
+    if new.amount < 0 then
+        set new.validate = 0;
+    end if;
+//
+
+
